@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html lang="ko" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>STUDY STRATEGY PLANNER - AI 스케줄 & D-Day 엔진</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Pretendard:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Pretendard', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            dark: {
+              bg: '#0a0d12',
+              panel: '#121721',
+              card: '#1b222f',
+              border: '#2a3447',
+              hover: '#242f42'
+            },
+            accent: {
+              fixed: '#ff3b3b',
+              must: '#00e5ff',
+              want: '#10b981',
+              purple: '#a855f7',
+              amber: '#f59e0b'
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #0a0d12;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #2a3447;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #3b4963;
+    }
+
+    .bg-grid-pattern {
+      background-image: radial-gradient(#2a3447 1px, transparent 1px);
+      background-size: 24px 24px;
+    }
+
+    /* Tactile 3D Button Styles */
+    .btn-tactile-main {
+      background: linear-gradient(180deg, #1ad9f0 0%, #00a8c6 100%);
+      box-shadow: 0 4px 0 #006b7d, 0 8px 15px rgba(0, 229, 255, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+      border-top: 1px solid rgba(255, 255, 255, 0.5);
+      border-bottom: 2px solid #004b58;
+      transition: all 0.1s ease-in-out;
+    }
+    .btn-tactile-main:hover {
+      background: linear-gradient(180deg, #3be0f5 0%, #00b9da 100%);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 0 #006b7d, 0 12px 20px rgba(0, 229, 255, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+    }
+    .btn-tactile-main:active {
+      transform: translateY(2px);
+      box-shadow: 0 2px 0 #006b7d, 0 4px 10px rgba(0, 229, 255, 0.2);
+    }
+
+    .btn-tactile-dday {
+      background: linear-gradient(180deg, #c084fc 0%, #7e22ce 100%);
+      box-shadow: 0 3px 0 #581c87, 0 4px 12px rgba(168, 85, 247, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+      border-top: 1px solid rgba(255, 255, 255, 0.5);
+      transition: all 0.1s ease-in-out;
+    }
+    .btn-tactile-dday:hover {
+      background: linear-gradient(180deg, #d8b4fe 0%, #9333ea 100%);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 0 #581c87, 0 6px 15px rgba(168, 85, 247, 0.5);
+    }
+    .btn-tactile-dday:active {
+      transform: translateY(2px);
+      box-shadow: 0 1px 0 #581c87;
+    }
+
+    .btn-tactile-fixed {
+      background: linear-gradient(180deg, #ff5252 0%, #c62828 100%);
+      box-shadow: 0 3px 0 #8e0000, 0 4px 12px rgba(255, 59, 59, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+      border-top: 1px solid rgba(255, 255, 255, 0.4);
+      transition: all 0.1s ease-in-out;
+    }
+    .btn-tactile-fixed:hover {
+      background: linear-gradient(180deg, #ff6b6b 0%, #d32f2f 100%);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 0 #8e0000, 0 6px 15px rgba(255, 59, 59, 0.45);
+    }
+    .btn-tactile-fixed:active {
+      transform: translateY(2px);
+      box-shadow: 0 1px 0 #8e0000;
+    }
+
+    .btn-tactile-must {
+      background: linear-gradient(180deg, #00d2eb 0%, #008ba3 100%);
+      box-shadow: 0 3px 0 #005a6a, 0 4px 12px rgba(0, 229, 255, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+      border-top: 1px solid rgba(255, 255, 255, 0.4);
+      transition: all 0.1s ease-in-out;
+    }
+    .btn-tactile-must:hover {
+      background: linear-gradient(180deg, #1de0f7 0%, #009cb7 100%);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 0 #005a6a, 0 6px 15px rgba(0, 229, 255, 0.4);
+    }
+    .btn-tactile-must:active {
+      transform: translateY(2px);
+      box-shadow: 0 1px 0 #005a6a;
+    }
+
+    .btn-tactile-want {
+      background: linear-gradient(180deg, #10b981 0%, #047857 100%);
+      box-shadow: 0 3px 0 #064e3b, 0 4px 12px rgba(16, 185, 129, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+      border-top: 1px solid rgba(255, 255, 255, 0.4);
+      transition: all 0.1s ease-in-out;
+    }
+    .btn-tactile-want:hover {
+      background: linear-gradient(180deg, #34d399 0%, #059669 100%);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 0 #064e3b, 0 6px 15px rgba(16, 185, 129, 0.4);
+    }
+    .btn-tactile-want:active {
+      transform: translateY(2px);
+      box-shadow: 0 1px 0 #064e3b;
+    }
+
+    .btn-tactile-sub {
+      background: linear-gradient(180deg, #2a3447 0%, #1a212e 100%);
+      box-shadow: 0 2.5px 0 #0f141d, inset 0 1px 0 rgba(255, 255, 255, 0.15);
+      border-top: 1px solid rgba(255, 255, 255, 0.2);
+      border-bottom: 1px solid #0f141d;
+      transition: all 0.1s ease-in-out;
+    }
+    .btn-tactile-sub:hover {
+      background: linear-gradient(180deg, #35425b 0%, #222b3c 100%);
+      transform: translateY(-1px);
+      box-shadow: 0 3.5px 0 #0f141d;
+    }
+    .btn-tactile-sub:active {
+      transform: translateY(2px);
+      box-shadow: 0 1px 0 #0f141d;
+    }
+
+    .btn-tactile-del {
+      background: linear-gradient(180deg, #3f1717 0%, #250b0b 100%);
+      box-shadow: 0 2px 0 #150404;
+      border: 1px solid #5c2020;
+      transition: all 0.08s ease-in-out;
+    }
+    .btn-tactile-del:hover {
+      background: linear-gradient(180deg, #ef4444 0%, #991b1b 100%);
+      box-shadow: 0 2px 0 #5c0909;
+    }
+    .btn-tactile-del:active {
+      transform: translateY(1px);
+    }
+
+    input[type=number]::-webkit-inner-spin-button, 
+    input[type=number]::-webkit-outer-spin-button { 
+      opacity: 0.5;
+    }
+  </style>
+</head>
+<body class="bg-dark-bg text-slate-200 min-h-screen font-sans bg-grid-pattern antialiased selection:bg-accent-must selection:text-black">
+
+  <div class="max-w-7xl mx-auto px-4 py-5 sm:px-6 lg:px-8">
+    <header class="flex flex-col md:flex-row md:items-center md:justify-between pb-4 mb-5 border-b border-dark-border gap-4">
+      <div>
+        <div class="flex items-center gap-2.5">
+          <span class="inline-block w-3 h-3 rounded-full bg-accent-must shadow-[0_0_10px_#00e5ff] animate-pulse"></span>
+          <h1 class="text-xl sm:text-2xl font-black font-mono tracking-tight text-white flex items-center gap-2">
+            STUDY STRATEGY <span class="text-accent-must drop-shadow-[0_0_8px_rgba(0,229,255,0.4)]">PLANNER</span>
+          </h1>
+          <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-dark-card border border-dark-border text-slate-300 shadow-inner">v3.3</span>
+        </div>
+        <p class="text-xs text-slate-400 mt-0.5">
+          예상 소요시간에 <span class="text-accent-must font-semibold">+30분 여유 버퍼</span>를 자동 가산하여 최적 타임라인을 계산합니다.
+        </p>
+      </div>
+
+      <!-- Quick Action Utilities -->
+      <div class="flex flex-wrap items-center gap-2">
+        <button onclick="openDDayModal()" class="btn-tactile-dday px-3.5 py-1.5 text-xs font-mono font-bold rounded-lg text-white shadow-md">
+          D-Day 설정
+        </button>
+        <button onclick="loadSampleData()" class="btn-tactile-sub px-3 py-1.5 text-xs font-mono font-bold rounded-lg text-slate-200 flex items-center gap-1">
+          <span>⚡</span> 샘플 로드
+        </button>
+        <button onclick="resetAll()" class="btn-tactile-sub px-3 py-1.5 text-xs font-mono font-bold rounded-lg text-red-400 hover:text-red-300 flex items-center gap-1">
+          <span>🔄</span> 전체 초기화
+        </button>
+      </div>
+    </header>
+
+    <!-- DIRECT DISPLAY D-DAY BANNER -->
+    <section id="nearest-dday-banner" class="mb-5 bg-dark-panel border border-purple-900/60 rounded-xl px-4 py-2.5 shadow-lg flex items-center justify-between gap-3 relative overflow-hidden">
+      <div class="absolute top-0 right-0 w-32 h-32 bg-purple-600/5 rounded-full blur-2xl pointer-events-none"></div>
+      
+      <div class="flex items-center gap-2.5 overflow-hidden">
+        <span class="flex h-2 w-2 relative shrink-0">
+          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-75"></span>
+          <span class="relative inline-flex rounded-full h-2 w-2 bg-purple-500"></span>
+        </span>
+        <div id="banner-dday-title" class="text-xs sm:text-sm font-semibold text-white truncate">
+          D-Day 설정 버튼을 눌러 일정을 등록해보세요
+        </div>
+      </div>
+      
+      <div id="banner-dday-badge" class="shrink-0 font-mono text-xs font-black text-purple-300 bg-purple-950/80 border border-purple-700/60 px-2.5 py-1 rounded shadow-inner">
+        D-DAY --
+      </div>
+    </section>
+
+    <main class="space-y-6">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+
+        <!-- 1. FIXED SCHEDULE MODULE -->
+        <section class="bg-dark-panel border border-dark-border rounded-xl p-4 flex flex-col justify-between hover:border-red-900/60 transition shadow-xl relative overflow-hidden">
+          <div>
+            <div class="flex items-center justify-between mb-3 pb-2.5 border-b border-dark-border">
+              <div class="flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-accent-fixed shadow-[0_0_6px_#ff3b3b]"></span>
+                <h2 class="font-mono text-xs font-bold tracking-wider text-white uppercase">1. 고정 일정 (학교/학원)</h2>
+              </div>
+              <span class="text-[10px] font-mono font-bold uppercase bg-red-950/80 text-accent-fixed border border-red-800/60 px-1.5 py-0.5 rounded">고정</span>
+            </div>
+
+            <div class="space-y-2.5 mb-4">
+              <div>
+                <label class="block text-[11px] font-medium text-slate-400 mb-1">일정 명칭</label>
+                <input type="text" id="fixed-name" placeholder="예: 수학학원 / 학교 수업" 
+                  class="w-full bg-dark-bg border border-dark-border rounded-lg px-3 py-1.5 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-accent-fixed shadow-inner transition">
+              </div>
+              <div class="grid grid-cols-2 gap-2">
+                <div>
+                  <label class="block text-[11px] font-medium text-slate-400 mb-1">시작 시간</label>
+                  <input type="time" id="fixed-start" value="09:00" 
+                    class="w-full bg-dark-bg border border-dark-border rounded-lg px-2.5 py-1.5 text-xs text-white font-mono focus:outline-none focus:border-accent-fixed shadow-inner transition">
+                </div>
+                <div>
+                  <label class="block text-[11px] font-medium text-slate-400 mb-1">종료 시간</label>
+                  <input type="time" id="fixed-end" value="12:00" 
+                    class="w-full bg-dark-bg border border-dark-border rounded-lg px-2.5 py-1.5 text-xs text-white font-mono focus:outline-none focus:border-accent-fixed shadow-inner transition">
+                </div>
+              </div>
+              <button onclick="addFixedItem()" 
+                class="btn-tactile-fixed w-full py-2 text-white font-mono text-xs font-bold rounded-lg uppercase">
+                + 고정 일정 등록
+              </button>
+            </div>
+          </div>
+
+          <div>
+            <div class="text-[10px] font-mono text-slate-500 uppercase mb-1.5 flex justify-between items-center">
+              <span>등록 목록</span>
+              <span id="fixed-count" class="text-accent-fixed font-bold">0</span>
+            </div>
+            <ul id="fixed-list" class="space-y-1.5 max-h-40 overflow-y-auto pr-1"></ul>
+          </div>
+        </section>
+
+        <!-- 2. ESSENTIAL (MUST-DO) MODULE -->
+        <section class="bg-dark-panel border border-dark-border rounded-xl p-4 flex flex-col justify-between hover:border-cyan-900/60 transition shadow-xl relative overflow-hidden">
+          <div>
+            <div class="flex items-center justify-between mb-3 pb-2.5 border-b border-dark-border">
+              <div class="flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-accent-must shadow-[0_0_6px_#00e5ff]"></span>
+                <h2 class="font-mono text-xs font-bold tracking-wider text-white uppercase">2. 필수 할 일 (공부/과제)</h2>
+              </div>
+              <span class="text-[10px] font-mono font-bold uppercase bg-cyan-950/80 text-accent-must border border-cyan-800/60 px-1.5 py-0.5 rounded">+30m</span>
+            </div>
+
+            <div class="space-y-2.5 mb-4">
+              <div>
+                <label class="block text-[11px] font-medium text-slate-400 mb-1">할 일 명칭</label>
+                <input type="text" id="must-name" placeholder="예: 영어 단어 암기 / 기출 풀이" 
+                  class="w-full bg-dark-bg border border-dark-border rounded-lg px-3 py-1.5 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-accent-must shadow-inner transition">
+              </div>
+              <div>
+                <div class="flex justify-between items-center mb-1">
+                  <label class="block text-[11px] font-medium text-slate-400">예상 시간 (시간 단위)</label>
+                  <span class="text-[10px] text-accent-must font-mono">+30분 자동보정</span>
+                </div>
+                <input type="number" id="must-hours" placeholder="예: 1.5" step="0.5" min="0.5"
+                  class="w-full bg-dark-bg border border-dark-border rounded-lg px-3 py-1.5 text-xs text-white font-mono focus:outline-none focus:border-accent-must shadow-inner transition">
+              </div>
+              <button onclick="addMustItem()" 
+                class="btn-tactile-must w-full py-2 text-black font-mono text-xs font-bold rounded-lg uppercase">
+                + 필수 과제 추가 (+30분 대입)
+              </button>
+            </div>
+          </div>
+
+          <div>
+            <div class="text-[10px] font-mono text-slate-500 uppercase mb-1.5 flex justify-between items-center">
+              <span>등록 목록</span>
+              <span id="must-count" class="text-accent-must font-bold">0</span>
+            </div>
+            <ul id="must-list" class="space-y-1.5 max-h-40 overflow-y-auto pr-1"></ul>
+          </div>
+        </section>
+
+        <!-- 3. OPTIONAL (WANT-TO-DO) MODULE -->
+        <section class="bg-dark-panel border border-dark-border rounded-xl p-4 flex flex-col justify-between hover:border-emerald-900/60 transition shadow-xl relative overflow-hidden">
+          <div>
+            <div class="flex items-center justify-between mb-3 pb-2.5 border-b border-dark-border">
+              <div class="flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-accent-want shadow-[0_0_6px_#10b981]"></span>
+                <h2 class="font-mono text-xs font-bold tracking-wider text-white uppercase">3. 하고 싶은 일 (선택/휴식)</h2>
+              </div>
+              <span class="text-[10px] font-mono font-bold uppercase bg-emerald-950/80 text-accent-want border border-emerald-800/60 px-1.5 py-0.5 rounded">+30m</span>
+            </div>
+
+            <div class="space-y-2.5 mb-4">
+              <div>
+                <label class="block text-[11px] font-medium text-slate-400 mb-1">활동 명칭</label>
+                <input type="text" id="want-name" placeholder="예: 게임하기 / 산책 / 유튜브 시청" 
+                  class="w-full bg-dark-bg border border-dark-border rounded-lg px-3 py-1.5 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-accent-want shadow-inner transition">
+              </div>
+              <div>
+                <div class="flex justify-between items-center mb-1">
+                  <label class="block text-[11px] font-medium text-slate-400">예상 시간 (시간 단위)</label>
+                  <span class="text-[10px] text-accent-want font-mono">+30분 자동보정</span>
+                </div>
+                <input type="number" id="want-hours" placeholder="예: 1.0" step="0.5" min="0.5"
+                  class="w-full bg-dark-bg border border-dark-border rounded-lg px-3 py-1.5 text-xs text-white font-mono focus:outline-none focus:border-accent-want shadow-inner transition">
+              </div>
+              <button onclick="addWantItem()" 
+                class="btn-tactile-want w-full py-2 text-black font-mono text-xs font-bold rounded-lg uppercase">
+                + 선택 활동 추가 (+30분 대입)
+              </button>
+            </div>
+          </div>
+
+          <div>
+            <div class="text-[10px] font-mono text-slate-500 uppercase mb-1.5 flex justify-between items-center">
+              <span>등록 목록</span>
+              <span id="want-count" class="text-accent-want font-bold">0</span>
+            </div>
+            <ul id="want-list" class="space-y-1.5 max-h-40 overflow-y-auto pr-1"></ul>
+          </div>
+        </section>
+
+      </div>
+
+      <div>
+        <button onclick="generateSchedule()" 
+          class="btn-tactile-main w-full py-3.5 text-black font-mono font-black text-sm sm:text-base tracking-wider rounded-xl uppercase flex items-center justify-center gap-2">
+          <span>🚀</span> GENERATE OPTIMAL TIMELINE (최적 스케줄 연산) <span>⚡</span>
+        </button>
+      </div>
+
+      <section class="bg-dark-panel border border-dark-border rounded-xl p-5 shadow-xl relative">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-3 mb-5 border-b border-dark-border gap-2">
+          <div>
+            <h2 class="text-lg font-black font-mono text-white flex items-center gap-2 tracking-tight">
+              <span>🗓️</span> CALCULATED STRATEGY TIMELINE
+            </h2>
+            <p class="text-[11px] text-slate-400">08:00 ~ 23:00 기준 빈 시간(Free Slots)을 계산하여 최적 일정을 생성합니다.</p>
+          </div>
+
+          <!-- Stat Pills -->
+          <div class="flex flex-wrap items-center gap-2 font-mono text-xs">
+            <div class="bg-dark-card border border-dark-border px-2.5 py-1 rounded-md flex items-center gap-1.5 shadow-inner">
+              <span class="text-slate-400">공부/과제:</span>
+              <span id="stat-must-time" class="text-accent-must font-bold">0분</span>
+            </div>
+            <div class="bg-dark-card border border-dark-border px-2.5 py-1 rounded-md flex items-center gap-1.5 shadow-inner">
+              <span class="text-slate-400">선택/휴식:</span>
+              <span id="stat-want-time" class="text-accent-want font-bold">0분</span>
+            </div>
+            <div class="bg-dark-card border border-dark-border px-2.5 py-1 rounded-md flex items-center gap-1.5 shadow-inner">
+              <span class="text-slate-400">남은 자유시간:</span>
+              <span id="stat-free-time" class="text-slate-200 font-bold">15시간</span>
+            </div>
+          </div>
+        </div>
+
+        <div id="unplaced-warning-box" class="hidden mb-4 p-3 rounded-lg bg-amber-950/40 border border-amber-800/60 text-amber-200 text-xs font-sans space-y-1"></div>
+
+        <div id="timeline-result" class="space-y-2.5 min-h-[140px] flex flex-col justify-center">
+          <div class="text-center py-10 text-slate-500 font-mono text-xs border border-dashed border-dark-border rounded-xl">
+            <p>일정을 입력하고 상단의 연산 버튼을 누르면 최적 타임라인이 계산됩니다.</p>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- D-DAY MODAL -->
+  <div id="dday-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-dark-panel border border-purple-800/80 rounded-2xl max-w-lg w-full p-5 shadow-2xl space-y-5 relative">
+      <div class="flex items-center justify-between border-b border-dark-border pb-3">
+        <div class="flex items-center gap-2">
+          <span class="text-xl">🎯</span>
+          <div>
+            <h3 class="text-base font-mono font-bold text-white">D-Day 일정 관리</h3>
+            <p class="text-xs text-slate-400">중요한 시험이나 일정을 등록하면 상단 배너에 표시됩니다.</p>
+          </div>
+        </div>
+        <button onclick="closeDDayModal()" class="text-slate-400 hover:text-white text-lg font-bold font-mono">✕</button>
+      </div>
+
+      <div class="space-y-2.5 bg-dark-card p-3.5 rounded-xl border border-dark-border">
+        <div>
+          <label class="block text-xs font-medium text-slate-300 mb-1">일정 명칭</label>
+          <input type="text" id="event-title" placeholder="예: 수학 수행평가 / 2학기 중간고사" 
+            class="w-full bg-dark-bg border border-dark-border rounded-lg px-3 py-1.5 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-purple-500">
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-slate-300 mb-1">목표 날짜</label>
+          <input type="date" id="event-date" 
+            class="w-full bg-dark-bg border border-dark-border rounded-lg px-3 py-1.5 text-xs text-white font-mono focus:outline-none focus:border-purple-500">
+        </div>
+        <button onclick="addDDayEvent()" class="btn-tactile-dday w-full py-2 text-white font-mono text-xs font-bold rounded-lg uppercase">
+          + D-Day 일정 등록하기
+        </button>
+      </div>
+
+      <div>
+        <div class="text-xs font-mono text-slate-400 mb-2 flex justify-between">
+          <span>등록된 D-Day 목록</span>
+          <span id="modal-event-count" class="text-purple-400 font-bold">0개</span>
+        </div>
+        <ul id="dday-event-list" class="space-y-1.5 max-h-48 overflow-y-auto pr-1"></ul>
+      </div>
+
+      <div class="pt-2 border-t border-dark-border text-right">
+        <button onclick="closeDDayModal()" class="btn-tactile-sub px-4 py-1.5 text-xs font-mono text-slate-200 rounded-lg">
+          닫기
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let fixedItems = [];
+    let mustItems = [];
+    let wantItems = [];
+    let ddayEvents = [];
+
+    function minToTime(minutes) {
+      const h = Math.floor(minutes / 60).toString().padStart(2, '0');
+      const m = (minutes % 60).toString().padStart(2, '0');
+      return `${h}:${m}`;
+    }
+
+    function timeToMin(timeStr) {
+      const [h, m] = timeStr.split(':').map(Number);
+      return h * 60 + m;
+    }
+
+    function escapeHtml(str) {
+      return str.replace(/[&<>"']/g, function(m) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m];
+      });
+    }
+
+    function calculateDDay(targetDateStr) {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      
+      const target = new Date(targetDateStr);
+      target.setHours(0, 0, 0, 0);
+
+      const diffTime = target - today;
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+      if (diffDays > 0) return { text: `D-${diffDays}`, days: diffDays, status: 'future' };
+      if (diffDays === 0) return { text: 'D-DAY', days: 0, status: 'today' };
+      return { text: `D+${Math.abs(diffDays)}`, days: diffDays, status: 'past' };
+    }
+
+    function openDDayModal() {
+      document.getElementById('dday-modal').classList.remove('hidden');
+    }
+
+    function closeDDayModal() {
+      document.getElementById('dday-modal').classList.add('hidden');
+    }
+
+    function addDDayEvent() {
+      const titleInput = document.getElementById('event-title');
+      const dateInput = document.getElementById('event-date');
+
+      const title = titleInput.value.trim();
+      const date = dateInput.value;
+
+      if (!title || !date) return alert('일정 명칭과 날짜를 모두 입력해 주세요.');
+
+      ddayEvents.push({ id: Date.now(), title, date });
+      titleInput.value = '';
+      dateInput.value = '';
+
+      updateDDayUI();
+    }
+
+    function deleteDDayEvent(id) {
+      ddayEvents = ddayEvents.filter(e => e.id !== id);
+      updateDDayUI();
+    }
+
+    function updateDDayUI() {
+      // Sort chronologically
+      ddayEvents.sort((a, b) => new Date(a.date) - new Date(b.date));
+
+      document.getElementById('modal-event-count').textContent = `${ddayEvents.length}개`;
+
+      // Render Modal Event List
+      const listEl = document.getElementById('dday-event-list');
+      if (ddayEvents.length === 0) {
+        listEl.innerHTML = `<li class="text-center py-5 text-slate-500 font-mono text-xs">등록된 D-Day가 없습니다.</li>`;
+      } else {
+        listEl.innerHTML = ddayEvents.map(event => {
+          const dday = calculateDDay(event.date);
+          let badgeColor = 'text-purple-300 border-purple-800 bg-purple-950/60';
+          if (dday.status === 'today') badgeColor = 'text-red-400 border-red-800 bg-red-950/80 animate-pulse';
+
+          return `
+            <li class="bg-dark-card border border-dark-border rounded-lg px-3 py-2 flex items-center justify-between text-xs">
+              <div>
+                <div class="font-bold text-white">${escapeHtml(event.title)}</div>
+                <div class="font-mono text-[10px] text-slate-400">${event.date}</div>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="font-mono font-bold text-[11px] px-2 py-0.5 rounded border ${badgeColor}">${dday.text}</span>
+                <button onclick="deleteDDayEvent(${event.id})" class="btn-tactile-del text-red-300 px-2 py-0.5 text-[10px] font-mono rounded font-bold">✕</button>
+              </div>
+            </li>
+          `;
+        }).join('');
+      }
+
+      // Update Top Compact Banner DIRECTLY showing event name(s)
+      const upcomingEvents = ddayEvents.filter(e => calculateDDay(e.date).days >= 0);
+      if (upcomingEvents.length > 0) {
+        const nearestDate = upcomingEvents[0].date;
+        const sameDayEvents = upcomingEvents.filter(e => e.date === nearestDate);
+        const dday = calculateDDay(nearestDate);
+
+        const eventNamesJoined = sameDayEvents.map(e => escapeHtml(e.title)).join(', ');
+        
+        document.getElementById('banner-dday-title').innerHTML = `
+          <span class="font-bold text-purple-200">${eventNamesJoined}</span>
+          <span class="text-slate-400 text-xs font-mono ml-1.5">(${nearestDate})</span>
+        `;
+        document.getElementById('banner-dday-badge').textContent = dday.text;
+      } else if (ddayEvents.length > 0) {
+        // Only past events remain
+        const pastEvent = ddayEvents[ddayEvents.length - 1];
+        const dday = calculateDDay(pastEvent.date);
+        document.getElementById('banner-dday-title').innerHTML = `
+          <span class="font-bold text-slate-300">${escapeHtml(pastEvent.title)}</span>
+          <span class="text-slate-500 text-xs font-mono ml-1.5">(종료된 일정)</span>
+        `;
+        document.getElementById('banner-dday-badge').textContent = dday.text;
+      } else {
+        document.getElementById('banner-dday-title').textContent = 'D-Day 설정 버튼을 눌러 일정을 등록해보세요';
+        document.getElementById('banner-dday-badge').textContent = 'D-DAY --';
+      }
+    }
+
+    // Schedule Handlers
+    function addFixedItem() {
+      const nameInput = document.getElementById('fixed-name');
+      const startInput = document.getElementById('fixed-start');
+      const endInput = document.getElementById('fixed-end');
+
+      const name = nameInput.value.trim();
+      const startMin = timeToMin(startInput.value);
+      const endMin = timeToMin(endInput.value);
+
+      if (!name) return alert('일정 명칭을 입력해 주세요.');
+      if (startMin >= endMin) return alert('종료 시간은 시작 시간보다 나중이어야 합니다.');
+
+      fixedItems.push({ id: Date.now(), name, start: startMin, end: endMin, type: 'fixed' });
+      nameInput.value = '';
+      
+      updateUI();
+    }
+
+    function addMustItem() {
+      const nameInput = document.getElementById('must-name');
+      const hoursInput = document.getElementById('must-hours');
+
+      const name = nameInput.value.trim();
+      const hours = parseFloat(hoursInput.value);
+
+      if (!name) return alert('할 일 명칭을 입력해 주세요.');
+      if (isNaN(hours) || hours <= 0) return alert('올바른 시간을 입력해 주세요 (예: 1.5)');
+
+      const totalMinutes = Math.round(hours * 60) + 30;
+      mustItems.push({ id: Date.now(), name, duration: totalMinutes, originalHours: hours, type: 'must' });
+
+      nameInput.value = '';
+      hoursInput.value = '';
+
+      updateUI();
+    }
+
+    function addWantItem() {
+      const nameInput = document.getElementById('want-name');
+      const hoursInput = document.getElementById('want-hours');
+
+      const name = nameInput.value.trim();
+      const hours = parseFloat(hoursInput.value);
+
+      if (!name) return alert('활동 명칭을 입력해 주세요.');
+      if (isNaN(hours) || hours <= 0) return alert('올바른 시간을 입력해 주세요 (예: 1.0)');
+
+      const totalMinutes = Math.round(hours * 60) + 30;
+      wantItems.push({ id: Date.now(), name, duration: totalMinutes, originalHours: hours, type: 'want' });
+
+      nameInput.value = '';
+      hoursInput.value = '';
+
+      updateUI();
+    }
+
+    function deleteItem(type, id) {
+      if (type === 'fixed') fixedItems = fixedItems.filter(item => item.id !== id);
+      if (type === 'must') mustItems = mustItems.filter(item => item.id !== id);
+      if (type === 'want') wantItems = wantItems.filter(item => item.id !== id);
+      
+      updateUI();
+    }
+
+    function resetAll() {
+      if (!confirm('모든 일정과 D-Day 데이터가 초기화됩니다. 진행하시겠습니까?')) return;
+      fixedItems = [];
+      mustItems = [];
+      wantItems = [];
+      ddayEvents = [];
+      
+      updateUI();
+      updateDDayUI();
+      
+      document.getElementById('timeline-result').innerHTML = `
+        <div class="text-center py-10 text-slate-500 font-mono text-xs border border-dashed border-dark-border rounded-xl">
+          <p>일정을 입력하고 상단의 연산 버튼을 누르면 최적 타임라인이 계산됩니다.</p>
+        </div>
+      `;
+      document.getElementById('unplaced-warning-box').classList.add('hidden');
+      document.getElementById('stat-must-time').textContent = '0분';
+      document.getElementById('stat-want-time').textContent = '0분';
+      document.getElementById('stat-free-time').textContent = '15시간';
+    }
+
+    function loadSampleData() {
+      fixedItems = [
+        { id: 101, name: '학교 수업', start: timeToMin('09:00'), end: timeToMin('15:30'), type: 'fixed' },
+        { id: 102, name: '수학 학원', start: timeToMin('18:00'), end: timeToMin('20:30'), type: 'fixed' }
+      ];
+
+      mustItems = [
+        { id: 201, name: '영어 단어 100개 암기', duration: 90, originalHours: 1, type: 'must' },
+        { id: 202, name: '수학 학원 숙제 복습', duration: 120, originalHours: 1.5, type: 'must' }
+      ];
+
+      // "게임하기" 샘플 추가 (예상 1시간 입력 ➔ +30분 자동 적용으로 90분)
+      wantItems = [
+        { id: 301, name: '게임하기', duration: 90, originalHours: 1, type: 'want' },
+        { id: 302, name: '유튜브 시청', duration: 60, originalHours: 0.5, type: 'want' }
+      ];
+
+      const today = new Date();
+      const targetDate = new Date(today.setDate(today.getDate() + 3)).toISOString().split('T')[0];
+
+      ddayEvents = [
+        { id: 401, title: '수학 수행평가', date: targetDate },
+        { id: 402, title: '영어 단어시험', date: targetDate }
+      ];
+
+      updateUI();
+      updateDDayUI();
+      generateSchedule();
+    }
+
+    function updateUI() {
+      document.getElementById('fixed-count').textContent = fixedItems.length;
+      document.getElementById('must-count').textContent = mustItems.length;
+      document.getElementById('want-count').textContent = wantItems.length;
+
+      document.getElementById('fixed-list').innerHTML = fixedItems.map(item => `
+        <li class="bg-dark-card border border-dark-border rounded-lg px-2.5 py-1.5 flex items-center justify-between text-xs shadow-sm">
+          <div>
+            <div class="font-medium text-slate-200 text-[11px]">${escapeHtml(item.name)}</div>
+            <div class="font-mono text-[10px] text-accent-fixed">${minToTime(item.start)} ~ ${minToTime(item.end)}</div>
+          </div>
+          <button onclick="deleteItem('fixed', ${item.id})" class="btn-tactile-del text-red-300 px-1.5 py-0.5 text-[10px] font-mono rounded font-bold">✕</button>
+        </li>
+      `).join('');
+
+      document.getElementById('must-list').innerHTML = mustItems.map(item => `
+        <li class="bg-dark-card border border-dark-border rounded-lg px-2.5 py-1.5 flex items-center justify-between text-xs shadow-sm">
+          <div>
+            <div class="font-medium text-slate-200 text-[11px]">${escapeHtml(item.name)}</div>
+            <div class="font-mono text-[10px] text-accent-must">
+              입력 ${item.originalHours}h <span class="text-slate-500">➔</span> 총 ${item.duration}분 (+30m)
+            </div>
+          </div>
+          <button onclick="deleteItem('must', ${item.id})" class="btn-tactile-del text-red-300 px-1.5 py-0.5 text-[10px] font-mono rounded font-bold">✕</button>
+        </li>
+      `).join('');
+
+      document.getElementById('want-list').innerHTML = wantItems.map(item => `
+        <li class="bg-dark-card border border-dark-border rounded-lg px-2.5 py-1.5 flex items-center justify-between text-xs shadow-sm">
+          <div>
+            <div class="font-medium text-slate-200 text-[11px]">${escapeHtml(item.name)}</div>
+            <div class="font-mono text-[10px] text-accent-want">
+              입력 ${item.originalHours}h <span class="text-slate-500">➔</span> 총 ${item.duration}분 (+30m)
+            </div>
+          </div>
+          <button onclick="deleteItem('want', ${item.id})" class="btn-tactile-del text-red-300 px-1.5 py-0.5 text-[10px] font-mono rounded font-bold">✕</button>
+        </li>
+      `).join('');
+    }
+
+    function generateSchedule() {
+      const DAY_START = 8 * 60;
+      const DAY_END = 23 * 60;
+
+      let sortedFixed = [...fixedItems].sort((a, b) => a.start - b.start);
+
+      let freeSlots = [];
+      let currentPointer = DAY_START;
+
+      for (let fixed of sortedFixed) {
+        if (fixed.start > currentPointer) {
+          freeSlots.push({ start: currentPointer, end: fixed.start });
+        }
+        currentPointer = Math.max(currentPointer, fixed.end);
+      }
+      if (currentPointer < DAY_END) {
+        freeSlots.push({ start: currentPointer, end: DAY_END });
+      }
+
+      let finalSchedule = [...sortedFixed];
+      let remainingMust = [...mustItems];
+      let remainingWant = [...wantItems];
+
+      function fillSlots(taskList) {
+        let unplaced = [];
+        for (let task of taskList) {
+          let placed = false;
+          for (let slot of freeSlots) {
+            let slotDuration = slot.end - slot.start;
+            if (slotDuration >= task.duration) {
+              finalSchedule.push({
+                name: task.name,
+                start: slot.start,
+                end: slot.start + task.duration,
+                duration: task.duration,
+                type: task.type
+              });
+              slot.start += task.duration;
+              placed = true;
+              break;
+            }
+          }
+          if (!placed) unplaced.push(task);
+        }
+        return unplaced;
+      }
+
+      let unplacedMust = fillSlots(remainingMust);
+      let unplacedWant = fillSlots(remainingWant);
+
+      finalSchedule.sort((a, b) => a.start - b.start);
+      renderTimelineResults(finalSchedule, unplacedMust, unplacedWant, freeSlots);
+    }
+
+    function renderTimelineResults(schedule, unplacedMust, unplacedWant, remainingSlots) {
+      const timelineEl = document.getElementById('timeline-result');
+      const warningBox = document.getElementById('unplaced-warning-box');
+
+      if (schedule.length === 0) {
+        timelineEl.innerHTML = `
+          <div class="text-center py-10 text-slate-500 font-mono text-xs border border-dashed border-dark-border rounded-xl">
+            <p>등록된 일정이나 과제가 없습니다.</p>
+          </div>`;
+        return;
+      }
+
+      let totalMustMin = schedule.filter(i => i.type === 'must').reduce((sum, i) => sum + i.duration, 0);
+      let totalWantMin = schedule.filter(i => i.type === 'want').reduce((sum, i) => sum + i.duration, 0);
+      let remainingFreeMin = remainingSlots.reduce((sum, slot) => sum + (slot.end - slot.start), 0);
+
+      document.getElementById('stat-must-time').textContent = `${totalMustMin}분 (${(totalMustMin/60).toFixed(1)}h)`;
+      document.getElementById('stat-want-time').textContent = `${totalWantMin}분 (${(totalWantMin/60).toFixed(1)}h)`;
+      document.getElementById('stat-free-time').textContent = `${Math.floor(remainingFreeMin/60)}시간 ${remainingFreeMin%60}분`;
+
+      if (unplacedMust.length > 0 || unplacedWant.length > 0) {
+        warningBox.classList.remove('hidden');
+        let warnHTML = '';
+        if (unplacedMust.length > 0) {
+          warnHTML += `<div>⚠️ <strong class="text-red-400">배치 불가 필수 과제:</strong> ${unplacedMust.map(i => escapeHtml(i.name)).join(', ')} (시간 부족)</div>`;
+        }
+        if (unplacedWant.length > 0) {
+          warnHTML += `<div>⚠️ <strong class="text-amber-400">배치 불가 선택 활동:</strong> ${unplacedWant.map(i => escapeHtml(i.name)).join(', ')}</div>`;
+        }
+        warningBox.innerHTML = warnHTML;
+      } else {
+        warningBox.classList.add('hidden');
+      }
+
+      let html = '';
+      schedule.forEach(item => {
+        let cardBg = 'bg-dark-card border-red-900/40 hover:border-red-500/60';
+        let badgeStyle = 'bg-red-950/80 text-accent-fixed border-red-800/60';
+        let badgeName = '고정 일정';
+        let accentGlow = 'border-l-4 border-l-accent-fixed';
+
+        if (item.type === 'must') {
+          cardBg = 'bg-dark-card border-cyan-900/40 hover:border-cyan-400/60';
+          badgeStyle = 'bg-cyan-950/80 text-accent-must border-cyan-800/60';
+          badgeName = '필수 (+30m 적용)';
+          accentGlow = 'border-l-4 border-l-accent-must';
+        } else if (item.type === 'want') {
+          cardBg = 'bg-dark-card border-emerald-900/40 hover:border-emerald-400/60';
+          badgeStyle = 'bg-emerald-950/80 text-accent-want border-emerald-800/60';
+          badgeName = '선택 (+30m 적용)';
+          accentGlow = 'border-l-4 border-l-accent-want';
+        }
+
+        let durationMins = item.end - item.start;
+
+        html += `
+          <div class="${cardBg} ${accentGlow} border rounded-lg p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 transition shadow-md">
+            <div class="flex items-center gap-2.5">
+              <span class="font-mono text-xs font-bold text-white bg-dark-bg px-2 py-0.5 rounded border border-dark-border shadow-inner">
+                ${minToTime(item.start)} ~ ${minToTime(item.end)}
+              </span>
+              <div>
+                <h3 class="font-bold text-white text-xs sm:text-sm">${escapeHtml(item.name)}</h3>
+                <span class="text-[9px] font-mono font-semibold px-1.5 py-0.2 rounded border ${badgeStyle} inline-block mt-0.5">
+                  ${badgeName}
+                </span>
+              </div>
+            </div>
+
+            <div class="font-mono text-[11px] text-slate-400 bg-dark-bg/60 px-2.5 py-1 rounded border border-dark-border self-start sm:self-auto">
+              소요 시간: <strong class="text-white">${durationMins}분</strong> (${(durationMins/60).toFixed(1)}h)
+            </div>
+          </div>
+        `;
+      });
+
+      timelineEl.innerHTML = html;
+    }
+  </script>
+
+</body>
+</html>
